@@ -33,10 +33,8 @@ function App () {
   }
 
   const [selectedCard, setSelectedCard] = React.useState({});
-  const [isImagePopupOpen, setImagePopupOpen] = React.useState(false)
   function handleCardClick(card) {
     setSelectedCard(card);
-    setImagePopupOpen(true);
     document.addEventListener('keydown', handleCloseByEscape);
     document.addEventListener('click', handleCloseByOverlay)
   }
@@ -45,7 +43,6 @@ function App () {
     setEditProfilePopupOpen(false);
     setAddPlacePopupOpen(false);
     setEditAvatarPopupOpen(false);
-    setImagePopupOpen(false)
     setSelectedCard('');
     document.removeEventListener('keydown', handleCloseByEscape);
     document.removeEventListener('click', handleCloseByOverlay);
@@ -107,8 +104,7 @@ function App () {
 
       <ImagePopup 
       card = {selectedCard} 
-      onClose = {closeAllPopups} 
-      isOpened = {isImagePopupOpen}/>
+      onClose = {closeAllPopups}/>
 
     </div>)
 }

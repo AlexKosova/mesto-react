@@ -3,7 +3,6 @@ import Card from './Card';
 import api from "../utils/Api";
 
 export default function Main (props) {
-  let userId = '';
 
   const [cards, setCard] = React.useState([]);
   const [userName, setUserName] = React.useState('');
@@ -13,7 +12,6 @@ export default function Main (props) {
   React.useEffect(() => {
     Promise.all([api.getUserInfo(), api.getInitialCards()])
     .then(([userData, items]) => {
-      userId = userData._id;
       setUserName (userData.name);
       setUserDescription (userData.about);
       setUserAvatar (userData.avatar);
@@ -22,7 +20,7 @@ export default function Main (props) {
     .catch((err) => {
       console.log(err);
     });
-  })
+  }, [])
 
   return (
     <main>
