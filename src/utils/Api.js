@@ -18,13 +18,13 @@ class Api {
     })
   }
 
-  editprofile(inputValue) {
+  setUserInfo(inputValue) {
     return this._request(`${this._url}/users/me`, {
       method: 'PATCH',
       headers: this._headers,
       body: JSON.stringify({
-        name: inputValue.userName,
-        about: inputValue.userJobInput
+        name: inputValue.name,
+        about: inputValue.about
       })
     })
   }
@@ -35,37 +35,37 @@ class Api {
     })
   }
 
-  addCard (element) {
+  addCard ({name, link}) {
     return this._request(`${this._url}/cards`, {
       method: 'POST',
       headers: this._headers,
       body: JSON.stringify({
-        name: element.postTitleInput,
-        link: element.postLinkInput,
+        name: name,
+        link: link,
       })
       })
   }
 
-  setLike (cardId) {
-    return this._request(`${this._url}/cards/likes/${cardId}`, {
-      method: 'PUT',
-      headers: this._headers
-    })
+  changeLikeCardStatus (cardId, isLiked) {
+    if (isLiked) {
+      return this._request(`${this._url}/cards/likes/${cardId}`, {
+        method: 'PUT',
+        headers: this._headers
+      })
+    } else {
+      return this._request(`${this._url}/cards/likes/${cardId}`, {
+        method: 'DELETE',
+        headers: this._headers
+      })
+    }
   }
 
-  deleteLike (cardId) {
-    return this._request(`${this._url}/cards/likes/${cardId}`, {
-      method: 'DELETE',
-      headers: this._headers
-    })
-  }
-
-  editPhoto (element) {
+  editPhoto (link) {
     return this._request(`${this._url}/users/me/avatar`, {
       method: 'PATCH',
       headers: this._headers,
       body: JSON.stringify({
-        avatar: element.photoLinkInput
+        avatar: link
       })
     })
   }

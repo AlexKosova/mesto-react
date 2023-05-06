@@ -1,42 +1,53 @@
 import React from 'react';
 import './App.css';
+import {CurrentUserContext} from '../contexts/CurrentUserContext';
+import api from "../utils/Api";
 
 
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
 import PopupWithForm from './PopupWithForm';
+import EditProfilePopup from './EditProfilePopup';
+import EditAvatarPopup from './EditAvatarPopup';
+import AddPlacePopup from './AddPlacePopup';
 import ImagePopup from './ImagePopup';
 
 
-function App () {
+export default function App () {
+
+  const [currentUser, setCurrentUser] = React.useState({});
+  const [cards, setCards] = React.useState([]);
+
+  React.useEffect(() => {
+    Promise.all([api.getUserInfo(), api.getInitialCards()])
+    .then(([userData, items]) => {
+      setCurrentUser(userData)
+      setCards(items)
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }, [])
 
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = React.useState(false)
   function handleEditProfileClick () {
     setEditProfilePopupOpen(true)
-    document.addEventListener('keydown', handleCloseByEscape)
-    document.addEventListener('click', handleCloseByOverlay)
   }
 
   const [isAddPlacePopupOpen, setAddPlacePopupOpen] = React.useState(false)
   function handleAddPlaceClick () {
     setAddPlacePopupOpen(true)
-    document.addEventListener('keydown', handleCloseByEscape);
-    document.addEventListener('click', handleCloseByOverlay)
   }
 
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = React.useState(false)
   function handleEditAvatarClick () {
     setEditAvatarPopupOpen(true)
-    document.addEventListener('keydown', handleCloseByEscape);
-    document.addEventListener('click', handleCloseByOverlay)
   }
 
   const [selectedCard, setSelectedCard] = React.useState({});
   function handleCardClick(card) {
     setSelectedCard(card);
-    document.addEventListener('keydown', handleCloseByEscape);
-    document.addEventListener('click', handleCloseByOverlay)
   }
 
   function closeAllPopups () {
@@ -44,69 +55,112 @@ function App () {
     setAddPlacePopupOpen(false);
     setEditAvatarPopupOpen(false);
     setSelectedCard('');
-    document.removeEventListener('keydown', handleCloseByEscape);
-    document.removeEventListener('click', handleCloseByOverlay);
   }
 
-  function handleCloseByEscape (evt) {
+  React.useEffect(() => {
+    function handleCloseByEscape (evt) {
     if (evt.key === 'Escape') {
       closeAllPopups()
     }
+  };
+  document.addEventListener('keydown', handleCloseByEscape)
+
+  return () => {
+    document.removeEventListener('keydown', handleCloseByEscape)
+  }
+  })
+
+  function handleCardLike (card) {
+    const isLiked = card.likes.some(i => i._id === currentUser._id);
+
+    api.changeLikeCardStatus(card._id, !isLiked)
+    .then((newCard) => {
+      setCards(cards.map((c) => c._id === card._id ? newCard : c))
+  })
+  .catch((err) => {
+      console.log(err);
+    })
   }
 
-  function handleCloseByOverlay (evt) {
+  function handleCardDelete (card) {
+    api.deleteCard(card._id).then(() => {
+      setCards(cards.filter((c) => c !== card)).catch((err) => {
+        console.log(err);
+      })
+  })}
+
+  function handleUpdateUser (inputValue) {
+    api.setUserInfo(inputValue).then(res => {
+      setCurrentUser(res);
+      closeAllPopups()}).catch((err) => {
+        console.log(err);
+      })
+  }
+
+  function handleUpdateAvatar (link) {
+    api.editPhoto(link).then(res => {
+      setCurrentUser(res);
+      closeAllPopups()
+    }).catch((err) => {
+      console.log(err)})
+  }
+
+  function handleAddPlace (card) {
+    api.addCard(card).then(newCard => {setCards([newCard, ...cards]);
+    closeAllPopups()}).catch((err) => {
+      console.log(err)})
+  }
+
+  function handleOverlayClick (evt) {
     if (evt.target.classList.contains('popup_opened')) {
       closeAllPopups()
     }
   }
-  
 
   return (
     <div className="page">
-      <Header />
-      <Main
-      isEditProfilePopupOpen = {false}
-      isAddPlacePopupOpen = {false}
-      isEditAvatarPopupOpen = {false}
-      onAvatarClick = {handleEditAvatarClick}
-      onPlaceClick = {handleAddPlaceClick}
-      onEditProfileClick = {handleEditProfileClick}
-      onCardClick = {handleCardClick}
-      />
-      <Footer />
-      <PopupWithForm title="Редактировать профиль" buttonText="Сохранить" name="editProfile" isOpened={isEditProfilePopupOpen} onClose={closeAllPopups} onByEscape={handleCloseByEscape} onOverlayClick = {handleCloseByOverlay}>
-        <form name="editProfile" noValidate>
-          <input required className="popup__input" type="text" placeholder="Введите имя" minLength="2" maxLength="40" name="userName" id="userNameInput" />
-          <span className="error" id="userNameInput-error"></span>
-          <input required className="popup__input" type="text" placeholder="Немного информации о себе" minLength="2" maxLength="200" name="userJobInput" id="userJobInput" />
-          <span id="userJobInput-error" className="error"></span>
-        </form>
-      </PopupWithForm>
+      <CurrentUserContext.Provider value = {currentUser}>
+        <Header />
+          <Main
+        isEditProfilePopupOpen = {false}
+        isAddPlacePopupOpen = {false}
+        isEditAvatarPopupOpen = {false}
+        onAvatarClick = {handleEditAvatarClick}
+        onPlaceClick = {handleAddPlaceClick}
+        onEditProfileClick = {handleEditProfileClick}
+        onCardClick = {handleCardClick}
+        cards = {cards}
+        currentUser = {currentUser}
+        onCardLike = {handleCardLike}
+        onCardDelete = {handleCardDelete}
+        />
+        <Footer />
+        <EditProfilePopup
+        isOpened={isEditProfilePopupOpen} 
+        onClose={closeAllPopups}
+        onOverlayClick = {handleOverlayClick}
+        onUpdateUser = {handleUpdateUser}/>
 
-      <PopupWithForm title="Новое место" buttonText="Создать" name="newPost" isOpened={isAddPlacePopupOpen} onClose={closeAllPopups} onByEscape={handleCloseByEscape} onOverlayClick = {handleCloseByOverlay}>
-        <form name="newPost" noValidate>
-          <input required className="popup__input" type="text" minLength="2" maxLength="30" placeholder="Название" name="postTitleInput" id="postTitleInput" />
-          <span id="postTitleInput-error" className="error"></span>
-          <input required className="popup__input" type="url" placeholder="Ссылка на картинку" name="postLinkInput" id="postLinkInput" />
-          <span id="postLinkInput-error" className="error"></span>
-        </form>
-      </PopupWithForm>
+        <EditAvatarPopup
+        isOpened={isEditAvatarPopupOpen} 
+        onClose={closeAllPopups}
+        onOverlayClick = {handleOverlayClick}
+        onUpdateAvatar={handleUpdateAvatar}/>
 
-      <PopupWithForm title="Обновить аватар" buttonText="Сохранить" name="editPhotoForm" isOpened={isEditAvatarPopupOpen} onClose={closeAllPopups} onByEscape={handleCloseByEscape} onOverlayClick = {handleCloseByOverlay}>
-        <form name="editPhotoForm" noValidate>
-          <input required className="popup__input popup__input_type_avatar" type="url" placeholder="Ссылка на аватар" name="photoLinkInput" id="photoLinkInput"/>
-          <span id="photoLinkInput-error" className="error"></span>
-        </form>
-      </PopupWithForm>
+        <AddPlacePopup
+        isOpened={isAddPlacePopupOpen}
+        onClose={closeAllPopups} 
+        onOverlayClick = {handleOverlayClick}
+        onAddPlace={handleAddPlace}/>
 
-      <PopupWithForm title="Вы уверены?" buttonText="Да" name="confirmDeletion" onClose={closeAllPopups} onByEscape={handleCloseByEscape} onOverlayClick = {handleCloseByOverlay}>
-      </PopupWithForm>
+        <PopupWithForm title="Вы уверены?" buttonText="Да" name="confirmDeletion" onClose={closeAllPopups}onOverlayClick = {handleOverlayClick}>
+        </PopupWithForm>
 
-      <ImagePopup 
-      card = {selectedCard} 
-      onClose = {closeAllPopups}/>
+        <ImagePopup 
+        card = {selectedCard} 
+        onClose = {closeAllPopups}
+        onOverlayClick ={handleOverlayClick}/>
 
+      </CurrentUserContext.Provider>
     </div>)
 }
-
-export default App

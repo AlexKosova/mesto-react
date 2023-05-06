@@ -18,7 +18,7 @@
 }
 
 .popup__input:last-of-type {
-    padding-top: 27px;
+  padding-top: 27px;
 }
 
 @media screen and (max-width: 767px) {
@@ -29,6 +29,4 @@
   .popup__input:first-of-type {
     margin-top: 70px;
   }
-
-  
 }
