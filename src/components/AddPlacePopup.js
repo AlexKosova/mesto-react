@@ -1,5 +1,4 @@
 import React, { useContext } from "react";
-import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import PopupWithForm from "./PopupWithForm";
 
 export default function AddPlacePopup ({
@@ -8,7 +7,7 @@ export default function AddPlacePopup ({
   onOverlayClick,
   onAddPlace
 }) {
-  const currentUser = useContext(CurrentUserContext);
+  
   const [name, setName] = React.useState('');
   const [link, setLink] = React.useState('');
   const [buttonText, setButtonText] = React.useState('Создать')
