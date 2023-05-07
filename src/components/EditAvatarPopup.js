@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import { CurrentUserContext } from "../contexts/CurrentUserContext";
 import PopupWithForm from "./PopupWithForm";
 
 export default function EditAvatarPopup ({
@@ -9,7 +8,6 @@ export default function EditAvatarPopup ({
   onUpdateAvatar
 }) {
 
-  const currentUser = React.useContext(CurrentUserContext);
   const [buttonText, setButtonText] = React.useState('Сохранить')
 
   React.useEffect(() => {

@@ -18,7 +18,7 @@ export default function EditProfilePopup ({
     setName(currentUser.name);
     setDescription(currentUser.about);
     setButtonText('Сохранить')
-  }, [currentUser]);
+  }, [currentUser, isOpened]);
 
   function handleChangeName (e) {
     setName(e.target.value)

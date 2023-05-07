@@ -54,7 +54,7 @@ export default function App () {
     setEditProfilePopupOpen(false);
     setAddPlacePopupOpen(false);
     setEditAvatarPopupOpen(false);
-    setSelectedCard('');
+    setSelectedCard({});
   }
 
   React.useEffect(() => {
@@ -84,7 +84,7 @@ export default function App () {
 
   function handleCardDelete (card) {
     api.deleteCard(card._id).then(() => {
-      setCards(cards.filter((c) => c !== card)).catch((err) => {
+      setCards(cards.filter((c) => c._id !== card._id)).catch((err) => {
         console.log(err);
       })
   })}
@@ -130,7 +130,6 @@ export default function App () {
         onEditProfileClick = {handleEditProfileClick}
         onCardClick = {handleCardClick}
         cards = {cards}
-        currentUser = {currentUser}
         onCardLike = {handleCardLike}
         onCardDelete = {handleCardDelete}
         />

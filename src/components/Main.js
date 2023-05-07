@@ -1,5 +1,6 @@
 import React from "react";
 import Card from './Card';
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 export default function Main ({
   onAvatarClick,
@@ -7,10 +8,11 @@ export default function Main ({
   onEditProfileClick,
   onCardClick,
   cards,
-  currentUser,
   onCardLike,
   onCardDelete
 }) {
+
+  const currentUser = React.useContext(CurrentUserContext);
 
   return (
     <main>
